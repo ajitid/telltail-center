@@ -1,65 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tailpin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://rsms.me/" />
-  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-  <style>
-    :root {
-      font-family: "Inter", sans-serif;
-    }
-
-    @supports (font-variation-settings: normal) {
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tailpin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <style>
       :root {
-        font-family: "Inter var", sans-serif;
+        font-family: "Inter", sans-serif;
       }
-    }
-  </style>
-</head>
 
-<body class="bg-gray-100">
-  <div class="container mx-auto px-3 py-6">
-    <h1 class="font-bold text-4xl mb-4">Tailpin</h1>
-    <input type="text" value="{{.Text}}" id="text" class="px-2 py-1 rounded-md border-2" />
-    <button type="button" id="copy" class="px-2 py-1 bg-sky-700 text-white rounded-md shadow">
-      Copy
-    </button>
-  </div>
-  <script type="text/javascript">
-    function debounce(func, timeout = 300) {
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          func.apply(this, args);
-        }, timeout);
-      };
-    }
+      @supports (font-variation-settings: normal) {
+        :root {
+          font-family: "Inter var", sans-serif;
+        }
+      }
+    </style>
+  </head>
 
-    const textEl = document.querySelector("#text");
-    textEl.addEventListener(
-      "input",
-      debounce((ev) => {
-        const text = ev.target.value;
-        fetch("/set", {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain; charset=UTF-8",
-          },
-          body: text,
-        });
-      })
-    );
+  <body class="bg-gray-100">
+    <div class="container mx-auto px-3 py-6">
+      <h1 class="font-bold text-4xl mb-4">Tailpin</h1>
+      <input
+        type="text"
+        value="{{.Text}}"
+        id="text"
+        class="px-2 py-1 rounded-md border-2"
+      />
+      <button
+        type="button"
+        id="copy"
+        class="px-2 py-1 bg-sky-700 text-white rounded-md shadow"
+      >
+        Copy
+      </button>
+    </div>
+    <script type="text/javascript">
+      function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            func.apply(this, args);
+          }, timeout);
+        };
+      }
 
-    document.querySelector("#copy").addEventListener("click", () => {
-      navigator.clipboard.writeText(textEl.value);
-    });
-  </script>
-</body>
+      const textEl = document.querySelector("#text");
+      textEl.addEventListener(
+        "input",
+        debounce((ev) => {
+          const text = ev.target.value;
+          fetch("/set", {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/plain; charset=UTF-8",
+            },
+            body: text,
+          });
+        })
+      );
 
+      document.querySelector("#copy").addEventListener("click", () => {
+        navigator.clipboard.writeText(textEl.value);
+      });
+    </script>
+  </body>
 </html>
