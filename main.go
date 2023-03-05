@@ -16,7 +16,17 @@ type HomeVars struct {
 	Text string
 }
 
+func noCache(w http.ResponseWriter) {
+	// Browsers are seemingly caching even w/o any caching header specified.
+	// So I've taken this value from header that Vercel CDN assigns to assets.
+	// I could've just used "no-cache" but that would be too boring.
+	// I'd assign noCache to any request that has method GET and Content-Type which starts with `text/`
+	w.Header().Set("Cache-Control", "public, max-age=0, must-revalidate")
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
+	noCache(w)
+
 	if r.URL.Path != "/" {
 		w.WriteHeader(404)
 		return
@@ -47,11 +57,14 @@ func set(w http.ResponseWriter, r *http.Request) {
 }
 
 func get(w http.ResponseWriter, r *http.Request) {
+	noCache(w)
 	w.Header().Add("Content-Type", "text/plain; charset=UTF-8")
 	fmt.Fprint(w, text)
 }
 
 func staticHandler(w http.ResponseWriter, r *http.Request) {
+	noCache(w)
+
 	path := r.URL.Path
 	/*
 		Seems like urls are already resolved by browsers and curl before processing,
