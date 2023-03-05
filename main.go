@@ -53,6 +53,15 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 func staticHandler(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
+	/*
+		Seems like urls are already resolved by browsers and curl before processing,
+		so site.com/static/../secret-file becomes site.com/secret-file
+		and hence is not handled by /static/ route.
+		This means we don't get path traversal attacks.
+		This however, is not applicable to query params and they are susceptible to it (either in url encoded form or w/o it)
+		In case my assumption is incorrect, I would use https://pkg.go.dev/path/filepath#Clean
+		and then retrieve the absolute path and then will make sure the resultant path starts with (program bin path + '/static/')
+	*/
 	data, err := os.ReadFile(path[1:])
 	if err != nil {
 		w.WriteHeader(404)
