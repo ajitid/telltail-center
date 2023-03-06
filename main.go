@@ -17,11 +17,9 @@ type HomeVars struct {
 }
 
 func noCache(w http.ResponseWriter) {
-	// Browsers are seemingly caching even w/o any caching header specified.
-	// So I've taken this value from header that Vercel CDN assigns to assets.
-	// I could've just used "no-cache" but that would be too boring.
-	// I'd assign noCache to any request that has method GET and Content-Type which starts with `text/`
-	w.Header().Set("Cache-Control", "public, max-age=0, must-revalidate")
+	// from https://stackoverflow.com/a/5493543/7683365 and
+	// https://web.dev/http-cache/#cache-control:~:text=browsers%20effectively%20guess%20what%20type%20of%20caching%20behavior%20makes%20the%20most%20sense
+	w.Header().Set("Cache-Control", "no-store, must-revalidate")
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
