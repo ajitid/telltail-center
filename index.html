@@ -37,17 +37,19 @@
       <button
         type="button"
         id="copy"
-        class="px-2 py-1 bg-sky-700 text-white rounded-md shadow"
+        class="ml-2 px-2 py-1 bg-sky-700 text-white rounded-md shadow"
       >
         Copy
       </button>
-      <button
-        type="button"
+      <a
         id="open-link"
-        class="px-2 py-1 bg-sky-700 text-white rounded-md shadow"
+        href=""
+        class="ml-2 text-sky-900 hidden"
+        target="_blank"
+        rel="noreferrer"
       >
-        Open link ↗
-      </button>
+        <span class="underline">Open link</span>↗
+      </a>
     </div>
     <script type="text/javascript">
       function debounce(func, timeout = 300) {
@@ -63,21 +65,18 @@
       const textEl = document.querySelector("#text");
       const openLinkEl = document.querySelector("#open-link");
 
-      // TODO open links in a no refererr new tab kinda way (see macwright.com's post on hackernews redirect)
-      // - stuff without noreferrer noopener nofollow can be sent to their analytics website which most people would like not to do
-      // check hwo browsers handle opening multiple links simultaneously
+      // check how browsers handle opening multiple links simultaneously
       // if it fails:
-      // split('\n') and only open the first link
-      // check if ananto's linkify can be used to recognize and list links
-      openLinkEl.addEventListener("click", () => {
-        window.open(textEl.value, "_blank");
-      });
+      // - split('\n') and only open the first link, or
+      // - check if ananto's linkify can be used to recognize and list links
 
       function checkAndShowOpenLinkButton(text) {
         try {
           new URL(textEl.value);
+          openLinkEl.href = textEl.value;
           openLinkEl.classList.remove("hidden");
         } catch {
+          openLinkEl.href = "";
           openLinkEl.classList.add("hidden");
         }
       }
@@ -95,8 +94,6 @@
             body: text,
           });
 
-          // multiline should be supported but there shouldn't any fancy-schmancy open link
-          // just identify if first line is a link and open it
           checkAndShowOpenLinkButton();
         })
       );
