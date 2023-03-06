@@ -62,6 +62,17 @@ func get(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, text)
 }
 
+func typeSetter(w http.ResponseWriter, path string) func(contentType string, exts ...string) {
+	return func(contentType string, exts ...string) {
+		for _, ext := range exts {
+			if strings.HasSuffix(path, ext) {
+				w.Header().Set("Content-Type", contentType)
+				return
+			}
+		}
+	}
+}
+
 func staticHandler(w http.ResponseWriter, r *http.Request) {
 	noCache(w)
 
@@ -80,11 +91,12 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
 		return
 	}
-	if strings.HasSuffix(path, "js") {
-		w.Header().Set("Content-Type", "text/javascript")
-	} else {
-		w.Header().Set("Content-Type", "text/css")
-	}
+
+	setType := typeSetter(w, path)
+	setType("text/javascript", ".js")
+	setType("text/css", ".css")
+	setType("image/svg+xml", ".svg", ".svgz")
+
 	_, err = w.Write(data)
 	if err != nil {
 		log.Println(err)
