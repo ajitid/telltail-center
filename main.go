@@ -8,9 +8,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/r3labs/sse/v2"
 )
 
 var text string
+var sseServer *sse.Server = sse.New()
 
 type HomeVars struct {
 	Text string
@@ -56,6 +59,9 @@ func set(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	text = string(b)
+	sseServer.Publish("text", &sse.Event{
+		Data: []byte(text),
+	})
 }
 
 func get(w http.ResponseWriter, r *http.Request) {
@@ -111,10 +117,16 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", home)
-	http.HandleFunc("/set", set)
-	http.HandleFunc("/get", get)
-	http.HandleFunc("/static/", staticHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", home)
+	mux.HandleFunc("/set", set)
+	mux.HandleFunc("/get", get)
+	mux.HandleFunc("/static/", staticHandler)
+
+	sseServer.AutoReplay = false
+	sseServer.CreateStream("text")
+	mux.HandleFunc("/events", sseServer.ServeHTTP)
+
 	// log.Fatal(http.ListenAndServe(":2222", nil))
-	log.Fatal(http.ListenAndServeTLS(":1111", "../../sd.alai-owl.ts.net.crt", "../../sd.alai-owl.ts.net.key", nil))
+	log.Fatal(http.ListenAndServeTLS(":1111", "../../sd.alai-owl.ts.net.crt", "../../sd.alai-owl.ts.net.key", mux))
 }
