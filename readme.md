@@ -5,7 +5,7 @@
   - iOS doesn't always runs Tailscale because of battery consumption, so don't think about incl. the program there. We also don't have control over when iOS can suspend the apps
   - Add a checkbox to automatically copy upon receiving SSE
     - Always send SSE on client at `/`, the website should give an option to automatically copy or not
-      - Use navigator.isonline and direct pings to device domain (:80) to restore SSE connection
+      - Use navigator.isonline and direct pings to device domain (:80) to restore SSE connection (reconnect)
       - Hide the option on small screens? Or identify iOS Safari is running to tell users why it won't be reliable
       - sending mutiple text is actually painful
 - Add startup.fish to dotfiles

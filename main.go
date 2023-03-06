@@ -23,8 +23,11 @@ func noCache(w http.ResponseWriter) {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(405)
+		return
+	}
 	noCache(w)
-
 	if r.URL.Path != "/" {
 		w.WriteHeader(404)
 		return
@@ -44,6 +47,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func set(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
+		w.WriteHeader(405)
 		return
 	}
 	b, err := io.ReadAll(r.Body)
@@ -72,6 +76,11 @@ func typeSetter(w http.ResponseWriter, path string) func(contentType string, ext
 }
 
 func staticHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(405)
+		return
+	}
+
 	noCache(w)
 
 	path := r.URL.Path
