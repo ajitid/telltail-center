@@ -71,8 +71,14 @@ func set(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Content-Type") == "application/json" {
 		j := setJson{}
 		json.Unmarshal(b, &j)
+		if len(j.Text) == 0 {
+			return
+		}
 		text = j.Text
 	} else {
+		if len(b) == 0 {
+			return
+		}
 		text = string(b)
 	}
 
