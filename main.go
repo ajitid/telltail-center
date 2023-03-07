@@ -146,6 +146,7 @@ func main() {
 	mux.HandleFunc("/get", get)
 	mux.HandleFunc("/static/", staticHandler)
 
+	sseServer.EncodeBase64 = true // if not done, only first line of multiline string will be send, see https://github.com/r3labs/sse/issues/62
 	sseServer.AutoReplay = false
 	sseServer.CreateStream("text")
 	mux.HandleFunc("/events", sseServer.ServeHTTP)
