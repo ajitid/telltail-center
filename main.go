@@ -122,7 +122,7 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 		In case my assumption is incorrect, I would use https://pkg.go.dev/path/filepath#Clean
 		and then retrieve the absolute path and then will make sure the resultant path starts with (program bin path + '/static/')
 	*/
-	data, err := os.ReadFile(filepath.Join(telltailDir, "static", path[1:]))
+	data, err := os.ReadFile(filepath.Join(telltailDir, path[1:]))
 	if err != nil {
 		w.WriteHeader(404)
 		return
