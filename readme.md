@@ -1,5 +1,6 @@
 ## Todo
 
+- use `const` in main.go
 - Add a button to recognize and open URL in a new tab
 - Add a program that listens SSE and automatically copies the content to clipboard (pbcopy xsel xclip wl-clipboard)
   - iOS doesn't always runs Tailscale because of battery consumption, so don't think about incl. the program there. We also don't have control over when iOS can suspend the apps
