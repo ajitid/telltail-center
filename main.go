@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -51,17 +52,30 @@ func home(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type setJson struct {
+	Text string `json:"text"`
+}
+
 func set(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(405)
 		return
 	}
+
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	text = string(b)
+
+	if r.Header.Get("Content-Type") == "application/json" {
+		j := setJson{}
+		json.Unmarshal(b, &j)
+		text = j.Text
+	} else {
+		text = string(b)
+	}
+
 	sseServer.Publish("text", &sse.Event{
 		Data: []byte(text),
 	})
