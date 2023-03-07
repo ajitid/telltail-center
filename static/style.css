@@ -551,6 +551,14 @@ video {
   margin-bottom: 1rem;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.hidden {
+  display: none;
+}
+
 .rounded-md {
   border-radius: 0.375rem;
 }
@@ -598,9 +606,19 @@ video {
   font-weight: 700;
 }
 
+.text-sky-900 {
+  --tw-text-opacity: 1;
+  color: rgb(12 74 110 / var(--tw-text-opacity));
+}
+
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.underline {
+  -webkit-text-decoration-line: underline;
+  text-decoration-line: underline;
 }
 
 .shadow {
