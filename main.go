@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/r3labs/sse/v2"
@@ -14,6 +15,8 @@ import (
 
 var text string
 var sseServer *sse.Server = sse.New()
+var homeDir string = "/home/ajitid"
+var telltailDir string = "/home/ajitid/playground/telltail"
 
 type HomeVars struct {
 	Text string
@@ -36,7 +39,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := template.ParseFiles("index.html")
+	t, err := template.ParseFiles(filepath.Join(telltailDir, "index.html"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Println("Template parsing error:", err)
@@ -99,7 +102,7 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 		In case my assumption is incorrect, I would use https://pkg.go.dev/path/filepath#Clean
 		and then retrieve the absolute path and then will make sure the resultant path starts with (program bin path + '/static/')
 	*/
-	data, err := os.ReadFile(path[1:])
+	data, err := os.ReadFile(filepath.Join(telltailDir, "static", path[1:]))
 	if err != nil {
 		w.WriteHeader(404)
 		return
@@ -127,6 +130,11 @@ func main() {
 	sseServer.CreateStream("text")
 	mux.HandleFunc("/events", sseServer.ServeHTTP)
 
-	// log.Fatal(http.ListenAndServe(":2222", nil))
-	log.Fatal(http.ListenAndServeTLS(":1111", "../../sd.alai-owl.ts.net.crt", "../../sd.alai-owl.ts.net.key", mux))
+	// homeDir, err := os.UserHomeDir()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	crt := filepath.Join(homeDir, "sd.alai-owl.ts.net.crt")
+	key := filepath.Join(homeDir, "sd.alai-owl.ts.net.key")
+	log.Fatal(http.ListenAndServeTLS(":1111", crt, key, mux))
 }
