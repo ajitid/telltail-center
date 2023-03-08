@@ -52,8 +52,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-type setJson struct {
-	Text string `json:"text"`
+type payload struct {
+	Text   string
+	Device string
 }
 
 func set(w http.ResponseWriter, r *http.Request) {
@@ -61,29 +62,30 @@ func set(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(405)
 		return
 	}
-
-	b, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
+	if r.Header.Get("Content-Type") != "application/json" {
+		w.WriteHeader(400)
 		return
 	}
 
-	if r.Header.Get("Content-Type") == "application/json" {
-		j := setJson{}
-		json.Unmarshal(b, &j)
-		if len(j.Text) == 0 {
-			return
-		}
-		text = j.Text
-	} else {
-		if len(b) == 0 {
-			return
-		}
-		text = string(b)
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(400)
+		return
 	}
 
-	sseServer.Publish("text", &sse.Event{
-		Data: []byte(text),
+	var p payload
+	json.Unmarshal(b, &p)
+	if p.Device == "" {
+		// must specify the device as `unknown` if there is hestitancy in uniquely naming it
+		w.WriteHeader(400)
+		return
+	}
+	if p.Text == "" {
+		return
+	}
+	text = p.Text
+	sseServer.Publish("texts", &sse.Event{
+		Data: b,
 	})
 }
 
@@ -148,7 +150,7 @@ func main() {
 
 	sseServer.EncodeBase64 = true // if not done, only first line of multiline string will be send, see https://github.com/r3labs/sse/issues/62
 	sseServer.AutoReplay = false
-	sseServer.CreateStream("text")
+	sseServer.CreateStream("texts")
 	mux.HandleFunc("/events", sseServer.ServeHTTP)
 
 	// homeDir, err := os.UserHomeDir()
