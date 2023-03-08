@@ -80,7 +80,8 @@ func set(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	if p.Text == "" {
+	// 65536 is not an arbitrarily picked number, see https://www.wikiwand.com/en/65,536#/In_computing
+	if len(p.Text) == 0 || len(p.Text) > 65536 {
 		return
 	}
 	text = p.Text
