@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,6 +19,9 @@ var text string
 var sseServer *sse.Server = sse.New()
 var homeDir string = "/home/ajitid"
 var telltailDir string = "/home/ajitid/playground/telltail"
+
+//go:embed static index.html
+var embeddedFS embed.FS
 
 type HomeVars struct {
 	Text string
@@ -40,7 +44,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := template.ParseFiles(filepath.Join(telltailDir, "index.html"))
+	t, err := template.ParseFS(embeddedFS, "index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Println("Template parsing error:", err)
@@ -142,17 +146,23 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type AssetsHandler struct{}
+
+func (h *AssetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	noCache(w)
+	http.FileServer(http.FS(embeddedFS)).ServeHTTP(w, r)
+}
+
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/set", set)
-	mux.HandleFunc("/get", get)
-	mux.HandleFunc("/static/", staticHandler)
+	http.HandleFunc("/", home)
+	http.HandleFunc("/set", set)
+	http.HandleFunc("/get", get)
+	http.Handle("/static/", &AssetsHandler{})
 
 	sseServer.EncodeBase64 = true // if not done, only first line of multiline string will be send, see https://github.com/r3labs/sse/issues/62
 	sseServer.AutoReplay = false
 	sseServer.CreateStream("texts")
-	mux.HandleFunc("/events", sseServer.ServeHTTP)
+	http.HandleFunc("/events", sseServer.ServeHTTP)
 
 	// homeDir, err := os.UserHomeDir()
 	// if err != nil {
@@ -160,5 +170,5 @@ func main() {
 	// }
 	crt := filepath.Join(homeDir, "sd.alai-owl.ts.net.crt")
 	key := filepath.Join(homeDir, "sd.alai-owl.ts.net.key")
-	log.Fatal(http.ListenAndServeTLS(":1111", crt, key, mux))
+	log.Fatal(http.ListenAndServeTLS(":1111", crt, key, nil))
 }
