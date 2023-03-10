@@ -1,29 +1,30 @@
 package main
 
 import (
+	"crypto/tls"
 	"embed"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/r3labs/sse/v2"
+	"tailscale.com/tsnet"
 )
 
-var text string
-var sseServer *sse.Server = sse.New()
-var homeDir string = "/home/ajitid"
-var telltailDir string = "/home/ajitid/playground/telltail"
+var (
+	text      string
+	sseServer *sse.Server = sse.New()
+)
 
 //go:embed static index.html
 var embeddedFS embed.FS
 
-type HomeVars struct {
+type homeTemplateVars struct {
 	Text string
 }
 
@@ -51,7 +52,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = t.Execute(w, HomeVars{
+	err = t.Execute(w, homeTemplateVars{
 		Text: text,
 	})
 }
@@ -111,41 +112,6 @@ func typeSetter(w http.ResponseWriter, path string) func(contentType string, ext
 	}
 }
 
-func staticHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		w.WriteHeader(405)
-		return
-	}
-
-	noCache(w)
-
-	path := r.URL.Path
-	/*
-		Seems like urls are already resolved by browsers and curl before processing,
-		so site.com/static/../secret-file becomes site.com/secret-file
-		and hence is not handled by /static/ route.
-		This means we don't get path traversal attacks.
-		This however, is not applicable to query params and they are susceptible to it (either in url encoded form or w/o it)
-		In case my assumption is incorrect, I would use https://pkg.go.dev/path/filepath#Clean
-		and then retrieve the absolute path and then will make sure the resultant path starts with (program bin path + '/static/')
-	*/
-	data, err := os.ReadFile(filepath.Join(telltailDir, path[1:]))
-	if err != nil {
-		w.WriteHeader(404)
-		return
-	}
-
-	setType := typeSetter(w, path)
-	setType("text/javascript", ".js")
-	setType("text/css", ".css")
-	setType("image/svg+xml", ".svg", ".svgz")
-
-	_, err = w.Write(data)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
 type AssetsHandler struct{}
 
 func (h *AssetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -153,7 +119,35 @@ func (h *AssetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.FileServer(http.FS(embeddedFS)).ServeHTTP(w, r)
 }
 
+func firstLabel(s string) string {
+	if hostname, _, ok := strings.Cut(s, "."); ok {
+		return hostname
+	}
+
+	return s
+}
+
 func main() {
+	var hostname string
+	flag.StringVar(&hostname, "hostname", "telltail", "Hostname for Telltail")
+	flag.Parse()
+
+	s := &tsnet.Server{
+		Hostname: hostname,
+	}
+	defer s.Close()
+
+	ln, err := s.Listen("tcp", ":443")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ln.Close()
+
+	lc, err := s.LocalClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	http.HandleFunc("/", home)
 	http.HandleFunc("/set", set)
 	http.HandleFunc("/get", get)
@@ -164,11 +158,13 @@ func main() {
 	sseServer.CreateStream("texts")
 	http.HandleFunc("/events", sseServer.ServeHTTP)
 
-	// homeDir, err := os.UserHomeDir()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	crt := filepath.Join(homeDir, "sd.alai-owl.ts.net.crt")
-	key := filepath.Join(homeDir, "sd.alai-owl.ts.net.key")
-	log.Fatal(http.ListenAndServeTLS(":1111", crt, key, nil))
+	// serve with http:
+	// log.Fatal(http.Serve(ln, nil))
+	// or with https:
+	server := http.Server{
+		TLSConfig: &tls.Config{
+			GetCertificate: lc.GetCertificate,
+		},
+	}
+	log.Fatal(server.ServeTLS(ln, "", ""))
 }
