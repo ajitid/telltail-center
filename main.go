@@ -1,19 +1,17 @@
 package main
 
 import (
-	"crypto/tls"
 	"embed"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/r3labs/sse/v2"
-	"tailscale.com/tsnet"
 )
 
 var (
@@ -128,26 +126,6 @@ func firstLabel(s string) string {
 }
 
 func main() {
-	var hostname string
-	flag.StringVar(&hostname, "hostname", "telltail", "Hostname for Telltail")
-	flag.Parse()
-
-	s := &tsnet.Server{
-		Hostname: hostname,
-	}
-	defer s.Close()
-
-	ln, err := s.Listen("tcp", ":443")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ln.Close()
-
-	lc, err := s.LocalClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	http.HandleFunc("/", home)
 	http.HandleFunc("/set", set)
 	http.HandleFunc("/get", get)
@@ -158,13 +136,10 @@ func main() {
 	sseServer.CreateStream("texts")
 	http.HandleFunc("/events", sseServer.ServeHTTP)
 
-	// serve with http:
-	// log.Fatal(http.Serve(ln, nil))
-	// or with https:
-	server := http.Server{
-		TLSConfig: &tls.Config{
-			GetCertificate: lc.GetCertificate,
-		},
-	}
-	log.Fatal(server.ServeTLS(ln, "", ""))
+	// generate cert with:
+	// tailscale cert sd.alai-owl.ts.net
+	baseDirForCerts := "" // fill it up
+	crt := filepath.Join(baseDirForCerts, "device.tailnet-name.ts.net.crt")
+	key := filepath.Join(baseDirForCerts, "device.tailnet-name.ts.net.key")
+	log.Fatal(http.ListenAndServeTLS(":1111", crt, key, nil))
 }
