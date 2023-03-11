@@ -1,5 +1,9 @@
 ## Todo
 
+- main issues
+  - in main branch code, auth key expires; in plain-server branch code certificate expires. both need to be regenerated manually.
+  - can't restore non-text formats
+  - can't mark the text as something not to be stored by clipboard (if coming from another device via Telltail)
 - use `const` in main.go
 - Add a button to recognize and open URL in a new tab
 - Add a program that listens SSE and automatically copies the content to clipboard (pbcopy xsel xclip wl-clipboard)
