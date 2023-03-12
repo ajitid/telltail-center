@@ -6,7 +6,8 @@
 
 ## Intro
 
-With Apple's Universal Clipboard, you can copy content from one Apple device and paste onto another. With Telltail, you copy text from any device to any other device.
+With Apple's Universal Clipboard, you can copy content from one Apple device and paste onto another.  
+With Telltail, you copy text from any device to any other device.
 
 Tailscale helps you to weave a secure connection between your devices. And Telltail leverages that connection to transfer text over.
 
@@ -21,6 +22,6 @@ It has two parts:
 
 This repository contains the former, telltail. Telltail Sync can be [found here](https://github.com/ajitid/telltail-sync).
 
-## How is it made
+## How it is made
 
 I've published [a blog post](https://hemarkable.com/notes/tools.tailscale.telltail) about it which you can read to understand more.

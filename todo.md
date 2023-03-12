@@ -1,5 +1,9 @@
 ## Todo
 
+- link https://hemarkable.com/notes/tools.tailscale.telltail to github repo (use /blog over /notes and combine /til) and solve that remaining TODO written in the post
+- tell users that if they don't want to use tailscale or don't want to consume extra node in tailnet, they can use feat/plain-server branch
+- read commit message of 5be83aa272e57d5b8d6a971e1e1e73b261550b99 (overthinking repo)
+
 - main issues
   - in main branch code, auth key expires; in plain-server branch code certificate expires. both need to be regenerated manually.
   - can't restore non-text formats
