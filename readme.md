@@ -24,4 +24,4 @@ This repository contains the former, telltail. Telltail Sync can be [found here]
 
 ## How it is made
 
-I've published [a blog post](https://hemarkable.com/notes/tools.tailscale.telltail) about it which you can read to understand more.
+I've published [a blog post](https://hemarkable.com/prose/telltail) about it which you can read to understand more.

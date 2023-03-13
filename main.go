@@ -10,7 +10,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/r3labs/sse/v2"
 	"tailscale.com/tsnet"
@@ -101,30 +100,11 @@ func get(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, text)
 }
 
-func typeSetter(w http.ResponseWriter, path string) func(contentType string, exts ...string) {
-	return func(contentType string, exts ...string) {
-		for _, ext := range exts {
-			if strings.HasSuffix(path, ext) {
-				w.Header().Set("Content-Type", contentType)
-				return
-			}
-		}
-	}
-}
-
 type AssetsHandler struct{}
 
 func (h *AssetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	noCache(w)
 	http.FileServer(http.FS(embeddedFS)).ServeHTTP(w, r)
-}
-
-func firstLabel(s string) string {
-	if hostname, _, ok := strings.Cut(s, "."); ok {
-		return hostname
-	}
-
-	return s
 }
 
 func main() {

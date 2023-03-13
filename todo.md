@@ -1,5 +1,10 @@
 ## Todo
 
+- tset dual boot
+- stop logging tsnet (too much noise)
+- get serve url
+- Why the hecc not put in into product hunt https://github.com/jiacai2050/text-saver?
+
 - link https://hemarkable.com/notes/tools.tailscale.telltail to github repo (use /blog over /notes and combine /til) and solve that remaining TODO written in the post
 - tell users that if they don't want to use tailscale or don't want to consume extra node in tailnet, they can use feat/plain-server branch
 - read commit message of 5be83aa272e57d5b8d6a971e1e1e73b261550b99 (overthinking repo)
