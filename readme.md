@@ -17,10 +17,10 @@ _Telltail is an independent project and is not affiliated with Tailscale._
 
 It has two parts:
 
-- **telltail**: A program that stores the text you want across your devices, and
-- **telltail-sync**: Interacts with 'telltail' and lets you copy and paste with your usual keyboard shortcuts. (Available for Linux (X11), macOS and Windows.)
+- **Center**: A program that stores the text you want across your devices, and
+- **Sync**: Interacts with Center and lets you copy and paste with your usual keyboard shortcuts. (Available for Linux (X11), macOS and Windows.)
 
-This repository contains the former, telltail. Telltail Sync can be [found here](https://github.com/ajitid/telltail-sync).
+This repository contains the former, Center. Sync can be [found here](https://github.com/ajitid/telltail-sync).
 
 ## How it is made
 

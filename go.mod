@@ -1,4 +1,4 @@
-module telltail
+module telltail-center
 
 go 1.20
 
