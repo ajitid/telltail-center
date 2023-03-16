@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"embed"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"html/template"
 	"io"
@@ -108,12 +107,8 @@ func (h *AssetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var hostname string
-	flag.StringVar(&hostname, "hostname", "telltail", "Hostname for Telltail")
-	flag.Parse()
-
 	s := &tsnet.Server{
-		Hostname: hostname,
+		Hostname: "telltail",
 	}
 	defer s.Close()
 
