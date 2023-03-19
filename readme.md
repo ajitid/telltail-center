@@ -2,8 +2,6 @@
   <img src="./logo.svg" height="100px" />
 </p>
 
-> The readme is not ready yet.
-
 ## Intro
 
 With Apple's Universal Clipboard, you can copy content from one Apple device and paste onto another.  
@@ -12,6 +10,10 @@ With Telltail, you copy text from any device to any other device.
 Tailscale helps you to weave a secure connection between your devices. And Telltail leverages that connection to transfer text over.
 
 _Telltail is an independent project and is not affiliated with Tailscale._
+
+## How to use
+
+We have prepared a [guide for you](https://guide-on.gitbook.io/telltail) that would help you to configure it.
 
 ## How it works
 
