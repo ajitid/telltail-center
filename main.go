@@ -99,9 +99,9 @@ func get(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, text)
 }
 
-type AssetsHandler struct{}
+type assetsHandler struct{}
 
-func (h *AssetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *assetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	noCache(w)
 	http.FileServer(http.FS(embeddedFS)).ServeHTTP(w, r)
 }
@@ -126,7 +126,7 @@ func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/set", set)
 	http.HandleFunc("/get", get)
-	http.Handle("/static/", &AssetsHandler{})
+	http.Handle("/static/", &assetsHandler{})
 
 	sseServer.EncodeBase64 = true // if not done, only first line of multiline string will be send, see https://github.com/r3labs/sse/issues/62
 	sseServer.AutoReplay = false
