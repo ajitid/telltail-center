@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/r3labs/sse/v2"
 	"tailscale.com/tsnet"
@@ -107,6 +108,8 @@ func (h *assetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	os.Setenv("TSNET_FORCE_LOGIN", "1")
+
 	s := &tsnet.Server{
 		Hostname: "telltail",
 	}
