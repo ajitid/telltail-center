@@ -108,6 +108,10 @@ func (h *assetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	if len(os.Getenv("TS_AUTHKEY")) == 0 {
+		log.Fatal("`TS_AUTHKEY` environment variable is not set")
+	}
+
 	os.Setenv("TSNET_FORCE_LOGIN", "1")
 
 	s := &tsnet.Server{
