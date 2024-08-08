@@ -83,8 +83,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 type payload struct {
-	Text   string
-	Device string
+	Text   string `json:"text"`
+	Device string `json:"device"`
 }
 
 func set(w http.ResponseWriter, r *http.Request) {
