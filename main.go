@@ -19,25 +19,9 @@ import (
 
 // replace with "github.com/urfave/cli/v2" if this gets serious
 var (
-	client = &http.Client{}
-
-	pushoverUser  = flag.String("pushover-user", "", "")
-	pushoverToken = flag.String("pushover-token", "", "")
-	// optional
-	pushoverDevice = flag.String("pushover-device", "", "")
-
 	customUrl = flag.String("custom-url", "", "")
 	httpCli   *http.Client
 )
-
-type pushoverData struct {
-	User     string `json:"user"`
-	Token    string `json:"token"`
-	Priority int8   `json:"priority"`
-	Ttl      uint32 `json:"ttl"`
-	Message  string `json:"message"`
-	Device   string `json:"device,omitempty"`
-}
 
 // ----
 
@@ -121,35 +105,6 @@ func set(w http.ResponseWriter, r *http.Request) {
 
 	if len(*customUrl) != 0 {
 		resp, err := httpCli.Post(*customUrl, "application/json", bytes.NewBuffer(b))
-		if err != nil {
-			// TODO add log (not fatal)
-			return
-		}
-		defer resp.Body.Close()
-	}
-
-	if len(*pushoverUser) != 0 && len(*pushoverToken) != 0 {
-		payload, err := json.Marshal(&pushoverData{
-			User:     *pushoverUser,
-			Token:    *pushoverToken,
-			Priority: -2,
-			Ttl:      1,
-			Message:  p.Text,
-			Device:   *pushoverDevice,
-		})
-		if err != nil {
-			// TODO add log (not fatal)
-			return
-		}
-
-		req, err := http.NewRequest("POST", "https://api.pushover.net/1/messages.json", bytes.NewBuffer(payload))
-		if err != nil {
-			// TODO add log (not fatal)
-			return
-		}
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := client.Do(req)
 		if err != nil {
 			// TODO add log (not fatal)
 			return
