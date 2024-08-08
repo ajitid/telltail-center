@@ -25,6 +25,9 @@ var (
 	pushoverToken = flag.String("pushover-token", "", "")
 	// optional
 	pushoverDevice = flag.String("pushover-device", "", "")
+
+	customUrl = flag.String("custom-url", "", "")
+	httpCli   *http.Client
 )
 
 type pushoverData struct {
@@ -116,7 +119,16 @@ func set(w http.ResponseWriter, r *http.Request) {
 		Data: b,
 	})
 
-	if len(*pushoverUser) > 0 && len(*pushoverToken) > 0 {
+	if len(*customUrl) != 0 {
+		resp, err := httpCli.Post(*customUrl, "application/json", bytes.NewBuffer(b))
+		if err != nil {
+			// TODO add log (not fatal)
+			return
+		}
+		defer resp.Body.Close()
+	}
+
+	if len(*pushoverUser) != 0 && len(*pushoverToken) != 0 {
 		payload, err := json.Marshal(&pushoverData{
 			User:     *pushoverUser,
 			Token:    *pushoverToken,
@@ -178,6 +190,8 @@ func main() {
 		log.Fatal(err)
 	}
 	defer ln.Close()
+
+	httpCli = s.HTTPClient()
 
 	lc, err := s.LocalClient()
 	if err != nil {
