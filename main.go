@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"embed"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html/template"
 	"io"
@@ -15,8 +17,29 @@ import (
 	"tailscale.com/tsnet"
 )
 
+// replace with "github.com/urfave/cli/v2" if this gets serious
 var (
-	text      string
+	client = &http.Client{}
+
+	pushoverUser  = flag.String("pushover-user", "", "")
+	pushoverToken = flag.String("pushover-token", "", "")
+	// optional
+	pushoverDevice = flag.String("pushover-device", "", "")
+)
+
+type pushoverData struct {
+	User     string `json:"user"`
+	Token    string `json:"token"`
+	Priority int8   `json:"priority"`
+	Ttl      uint32 `json:"ttl"`
+	Message  string `json:"message"`
+	Device   string `json:"device,omitempty"`
+}
+
+// ----
+
+var (
+	text      string      // should be wrapped in a mutex?
 	sseServer *sse.Server = sse.New()
 )
 
@@ -92,6 +115,35 @@ func set(w http.ResponseWriter, r *http.Request) {
 	sseServer.Publish("texts", &sse.Event{
 		Data: b,
 	})
+
+	if len(*pushoverUser) > 0 && len(*pushoverToken) > 0 {
+		payload, err := json.Marshal(&pushoverData{
+			User:     *pushoverUser,
+			Token:    *pushoverToken,
+			Priority: -2,
+			Ttl:      1,
+			Message:  p.Text,
+			Device:   *pushoverDevice,
+		})
+		if err != nil {
+			// TODO add log (not fatal)
+			return
+		}
+
+		req, err := http.NewRequest("POST", "https://api.pushover.net/1/messages.json", bytes.NewBuffer(payload))
+		if err != nil {
+			// TODO add log (not fatal)
+			return
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			// TODO add log (not fatal)
+			return
+		}
+		defer resp.Body.Close()
+	}
 }
 
 func get(w http.ResponseWriter, r *http.Request) {
@@ -108,6 +160,8 @@ func (h *assetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	flag.Parse()
+
 	if len(os.Getenv("TS_AUTHKEY")) == 0 {
 		log.Fatal("`TS_AUTHKEY` environment variable is not set")
 	}
