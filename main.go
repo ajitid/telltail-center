@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/r3labs/sse/v2"
@@ -19,8 +20,9 @@ import (
 
 // replace with "github.com/urfave/cli/v2" if this gets serious
 var (
-	customUrl = flag.String("custom-url", "", "")
-	httpCli   *http.Client
+	customUrl        = flag.String("custom-url", "", "")
+	isCustomUrlValid bool
+	httpCli          *http.Client
 )
 
 // ----
@@ -103,7 +105,7 @@ func set(w http.ResponseWriter, r *http.Request) {
 		Data: b,
 	})
 
-	if len(*customUrl) != 0 {
+	if isCustomUrlValid {
 		resp, err := httpCli.Post(*customUrl, "application/json", bytes.NewBuffer(b))
 		if err != nil {
 			// TODO add log (not fatal)
@@ -128,6 +130,8 @@ func (h *assetsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	flag.Parse()
+	_, err := url.ParseRequestURI(*customUrl)
+	isCustomUrlValid = err == nil
 
 	if len(os.Getenv("TS_AUTHKEY")) == 0 {
 		log.Fatal("`TS_AUTHKEY` environment variable is not set")
