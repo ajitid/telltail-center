@@ -1,5 +1,7 @@
 _Update: An [official solution](https://github.com/tailscale/tailscale/issues/4996#issuecomment-6152988347) has been released. Please try that out instead._
 
+---
+
 <p align="center">
   <img src="./logo.svg" height="100px" />
 </p>
